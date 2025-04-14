@@ -1,0 +1,2188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Series Bible</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <style>
+        :root {
+            --primary: #4a6fa5;
+            --secondary: #6b8cbc;
+            --light: #f5f7fa;
+            --dark: #333;
+            --border: #ddd;
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background-color: var(--light);
+            color: var(--dark);
+            line-height: 1.6;
+        }
+        .container {
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+        .sidebar {
+            width: 250px;
+            background-color: white;
+            border-right: 1px solid var(--border);
+            overflow-y: auto;
+            padding: 15px;
+        }
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .content-area {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        .btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 5px 0;
+        }
+        .btn:hover {
+            background-color: var(--secondary);
+        }
+        .btn-secondary {
+            background-color: var(--secondary);
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        h1, h2, h3 {
+            margin-bottom: 15px;
+            color: var(--primary);
+        }
+        .tab-container {
+            display: flex;
+            border-bottom: 1px solid var(--border);
+            background-color: white;
+        }
+        .tab {
+            padding: 10px 15px;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+        }
+        .tab.active {
+            border-bottom: 2px solid var(--primary);
+            color: var(--primary);
+            font-weight: bold;
+        }
+        .tab:hover {
+            background-color: var(--light);
+        }
+        .section {
+            display: none;
+            padding: 20px;
+        }
+        .section.active {
+            display: block;
+        }
+        .item {
+            margin: 10px 0;
+            padding: 10px;
+            background-color: white;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .item:hover {
+            background-color: var(--light);
+        }
+        .item.selected {
+            border-left: 3px solid var(--primary);
+        }
+        .category {
+            font-weight: bold;
+            margin-top: 15px;
+            margin-bottom: 5px;
+            color: var(--dark);
+        }
+        .search-box {
+            width: 100%;
+            margin-bottom: 15px;
+        }
+        .character-card, .location-card, .plotpoint-card, .book-card, .note-card {
+            background-color: white;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .card-actions {
+            display: flex;
+            gap: 5px;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
+        }
+        .tag {
+            display: inline-block;
+            background-color: var(--secondary);
+            color: white;
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-size: 12px;
+            margin-right: 5px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .form-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .form-row > * {
+            flex: 1;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 4px;
+            max-width: 600px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .close {
+            cursor: pointer;
+            font-size: 20px;
+        }
+        .timeline {
+            position: relative;
+            padding: 20px 0;
+        }
+        .timeline::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 20px;
+            width: 2px;
+            background-color: var(--secondary);
+        }
+        .timeline-item {
+            position: relative;
+            margin-bottom: 20px;
+            padding-left: 50px;
+        }
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: 14px;
+            top: 0;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: var(--primary);
+        }
+        .relationship-map {
+            min-height: 300px;
+            border: 1px solid var(--border);
+            background-color: white;
+            margin-top: 10px;
+            position: relative;
+        }
+        .relationship-line {
+            position: absolute;
+            background-color: var(--secondary);
+            transform-origin: 0 0;
+        }
+        .relationship-node {
+            position: absolute;
+            background-color: var(--primary);
+            color: white;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: move;
+            font-size: 12px;
+            text-align: center;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            padding: 5px;
+        }
+        .rich-editor {
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .editor-toolbar {
+            padding: 5px;
+            background-color: #f1f1f1;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+        .toolbar-btn {
+            background-color: white;
+            border: 1px solid #ddd;
+            padding: 4px 8px;
+            cursor: pointer;
+            border-radius: 3px;
+        }
+        .editor-content {
+            min-height: 200px;
+            padding: 10px;
+            background-color: white;
+            outline: none;
+        }
+        .save-status {
+            font-size: 12px;
+            color: #777;
+            padding: 5px;
+            text-align: right;
+        }
+        #exportData, #importData {
+            display: none;
+        }
+
+        .alert-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 200;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .alert-modal-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            max-width: 400px;
+            width: 100%;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            text-align: center;
+        }
+
+        .alert-header {
+            margin-bottom: 15px;
+        }
+
+        .alert-header h3 {
+            margin: 0;
+            color: var(--primary);
+        }
+
+        .alert-body {
+            margin-bottom: 20px;
+        }
+
+        .alert-actions {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .alert-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+
+        .icon-success {
+            color: #4CAF50;
+        }
+
+        .icon-error {
+            color: #F44336;
+        }
+
+        .icon-warning {
+            color: #FF9800;
+        }
+
+        .icon-info {
+            color: var(--primary);
+        }
+
+        .toast-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+
+        .toast {
+            background-color: white;
+            color: var(--dark);
+            padding: 12px 20px;
+            border-radius: 4px;
+            margin-top: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            animation: slideIn 0.3s ease, fadeOut 0.5s ease 2.5s forwards;
+            max-width: 300px;
+        }
+
+        .toast.success {
+            border-left: 4px solid #4CAF50;
+        }
+
+        .toast.error {
+            border-left: 4px solid #F44336;
+        }
+
+        .toast.warning {
+            border-left: 4px solid #FF9800;
+        }
+
+        .toast.info {
+            border-left: 4px solid var(--primary);
+        }
+
+        .toast-icon {
+            margin-right: 10px;
+            font-size: 20px;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeOut {
+            from {
+                opacity: 1;
+            }
+            to {
+                opacity: 0;
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.3s ease forwards;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .save-status.saving {
+            color: #FF9800;
+        }
+
+        .save-status.saved {
+            color: #4CAF50;
+        }
+
+        .save-status.error {
+            color: #F44336;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <h2>Series Bible</h2>
+            <input type="text" id="searchBox" class="search-box" placeholder="Search...">
+            <button id="newCharacterBtn" class="btn">+ Character</button>
+            <button id="newLocationBtn" class="btn">+ Location</button>
+            <button id="newPlotPointBtn" class="btn">+ Plot Point</button>
+            <button id="newBookBtn" class="btn">+ Book</button>
+            <button id="newNoteBtn" class="btn">+ Note</button>
+            
+            <div class="category">Characters</div>
+            <div id="charactersList"></div>
+            
+            <div class="category">Locations</div>
+            <div id="locationsList"></div>
+            
+            <div class="category">Plot Points</div>
+            <div id="plotPointsList"></div>
+            
+            <div class="category">Books</div>
+            <div id="booksList"></div>
+            
+            <div class="category">Notes</div>
+            <div id="notesList"></div>
+            
+            <div style="margin-top: 20px;">
+                <button id="exportBtn" class="btn btn-secondary">Export Data</button>
+                <button id="importBtn" class="btn btn-secondary">Import Data</button>
+                <input type="file" id="importData" accept=".json">
+                <a id="exportData" href="#" download="series-bible-data.json"></a>
+            </div>
+        </div>
+        
+        <div class="main-content">
+            <div class="tab-container">
+                <div class="tab active" data-tab="characters">Characters</div>
+                <div class="tab" data-tab="locations">Locations</div>
+                <div class="tab" data-tab="plot">Plot</div>
+                <div class="tab" data-tab="books">Books</div>
+                <div class="tab" data-tab="notes">Notes</div>
+                <div class="tab" data-tab="timeline">Timeline</div>
+                <div class="tab" data-tab="relationships">Relationships</div>
+            </div>
+            
+            <div class="content-area">
+                <div id="characters" class="section active">
+                    <h2>Characters</h2>
+                    <div id="charactersGrid" class="grid"></div>
+                </div>
+                
+                <div id="locations" class="section">
+                    <h2>Locations</h2>
+                    <div id="locationsGrid" class="grid"></div>
+                </div>
+                
+                <div id="plot" class="section">
+                    <h2>Plot Points</h2>
+                    <div id="plotGrid" class="grid"></div>
+                </div>
+                
+                <div id="books" class="section">
+                    <h2>Books</h2>
+                    <div id="booksGrid" class="grid"></div>
+                </div>
+                
+                <div id="notes" class="section">
+                    <h2>Notes</h2>
+                    <div id="notesGrid" class="grid"></div>
+                </div>
+                
+                <div id="timeline" class="section">
+                    <h2>Timeline</h2>
+                    <button id="organizeTimelineBtn" class="btn">Organize by Book</button>
+                    <div id="timelineContent" class="timeline"></div>
+                </div>
+                
+                <div id="relationships" class="section">
+                    <h2>Character Relationships</h2>
+                    <div id="relationshipMap" class="relationship-map"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="characterModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="characterModalTitle">New Character</h3>
+                <span class="close">&times;</span>
+            </div>
+            <form id="characterForm">
+                <input type="hidden" id="characterId">
+                <div class="form-group">
+                    <label for="characterName">Name</label>
+                    <input type="text" id="characterName" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="characterAge">Age</label>
+                        <input type="text" id="characterAge">
+                    </div>
+                    <div class="form-group">
+                        <label for="characterRole">Role</label>
+                        <input type="text" id="characterRole">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="characterAppearance">Appearance</label>
+                    <textarea id="characterAppearance"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="characterPersonality">Personality</label>
+                    <textarea id="characterPersonality"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="characterBackground">Background</label>
+                    <textarea id="characterBackground"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="characterGoals">Goals & Motivations</label>
+                    <textarea id="characterGoals"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="characterConflicts">Conflicts</label>
+                    <textarea id="characterConflicts"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="characterArc">Character Arc</label>
+                    <textarea id="characterArc"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="characterNotes">Additional Notes</label>
+                    <textarea id="characterNotes"></textarea>
+                </div>
+                <button type="submit" class="btn">Save Character</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="locationModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="locationModalTitle">New Location</h3>
+                <span class="close">&times;</span>
+            </div>
+            <form id="locationForm">
+                <input type="hidden" id="locationId">
+                <div class="form-group">
+                    <label for="locationName">Name</label>
+                    <input type="text" id="locationName" required>
+                </div>
+                <div class="form-group">
+                    <label for="locationType">Type</label>
+                    <input type="text" id="locationType">
+                </div>
+                <div class="form-group">
+                    <label for="locationDescription">Description</label>
+                    <textarea id="locationDescription"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="locationSignificance">Significance to Story</label>
+                    <textarea id="locationSignificance"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="locationNotes">Additional Notes</label>
+                    <textarea id="locationNotes"></textarea>
+                </div>
+                <button type="submit" class="btn">Save Location</button>
+            </form>
+        </div>
+    </div>
+    
+    <div id="plotPointModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="plotPointModalTitle">New Plot Point</h3>
+                <span class="close">&times;</span>
+            </div>
+            <form id="plotPointForm">
+                <input type="hidden" id="plotPointId">
+                <div class="form-group">
+                    <label for="plotPointTitle">Title</label>
+                    <input type="text" id="plotPointTitle" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="plotPointBook">Book</label>
+                        <select id="plotPointBook"></select>
+                    </div>
+                    <div class="form-group">
+                        <label for="plotPointOrder">Order</label>
+                        <input type="number" id="plotPointOrder" min="1">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="plotPointDescription">Description</label>
+                    <textarea id="plotPointDescription"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="plotPointCharacters">Characters Involved</label>
+                    <input type="text" id="plotPointCharacters">
+                </div>
+                <div class="form-group">
+                    <label for="plotPointConsequences">Consequences</label>
+                    <textarea id="plotPointConsequences"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="plotPointNotes">Additional Notes</label>
+                    <textarea id="plotPointNotes"></textarea>
+                </div>
+                <button type="submit" class="btn">Save Plot Point</button>
+            </form>
+        </div>
+    </div>
+    
+    <div id="bookModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="bookModalTitle">New Book</h3>
+                <span class="close">&times;</span>
+            </div>
+            <form id="bookForm">
+                <input type="hidden" id="bookId">
+                <div class="form-group">
+                    <label for="bookTitle">Title</label>
+                    <input type="text" id="bookTitle" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="bookNumber">Number in Series</label>
+                        <input type="number" id="bookNumber" min="1">
+                    </div>
+                    <div class="form-group">
+                        <label for="bookStatus">Status</label>
+                        <select id="bookStatus">
+                            <option value="Planning">Planning</option>
+                            <option value="Drafting">Drafting</option>
+                            <option value="Revising">Revising</option>
+                            <option value="Completed">Completed</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="bookSynopsis">Synopsis</label>
+                    <textarea id="bookSynopsis"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="bookThemes">Themes</label>
+                    <textarea id="bookThemes"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="bookCharacterArcs">Character Arcs</label>
+                    <textarea id="bookCharacterArcs"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="bookNotes">Additional Notes</label>
+                    <textarea id="bookNotes"></textarea>
+                </div>
+                <button type="submit" class="btn">Save Book</button>
+            </form>
+        </div>
+    </div>
+    
+    <div id="noteModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="noteModalTitle">New Note</h3>
+                <span class="close">&times;</span>
+            </div>
+            <form id="noteForm">
+                <input type="hidden" id="noteId">
+                <div class="form-group">
+                    <label for="noteTitle">Title</label>
+                    <input type="text" id="noteTitle" required>
+                </div>
+                <div class="form-group">
+                    <label for="noteCategory">Category</label>
+                    <select id="noteCategory">
+                        <option value="World Building">World Building</option>
+                        <option value="Magic System">Magic System</option>
+                        <option value="Technology">Technology</option>
+                        <option value="Culture">Culture</option>
+                        <option value="History">History</option>
+                        <option value="Research">Research</option>
+                        <option value="Ideas">Ideas</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="noteContent">Content</label>
+                    <div class="rich-editor">
+                        <div class="editor-toolbar">
+                            <button type="button" class="toolbar-btn" data-command="bold">B</button>
+                            <button type="button" class="toolbar-btn" data-command="italic">I</button>
+                            <button type="button" class="toolbar-btn" data-command="underline">U</button>
+                            <button type="button" class="toolbar-btn" data-command="insertUnorderedList">• List</button>
+                            <button type="button" class="toolbar-btn" data-command="insertOrderedList">1. List</button>
+                            <button type="button" class="toolbar-btn" data-command="createLink">Link</button>
+                        </div>
+                        <div id="noteContent" class="editor-content" contenteditable="true"></div>
+                        <div class="save-status" id="noteSaveStatus"></div>
+                    </div>
+                </div>
+                <button type="submit" class="btn">Save Note</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="confirmModal" class="alert-modal">
+        <div class="alert-modal-content">
+            <div class="alert-header">
+                <div class="alert-icon">⚠️</div>
+                <h3 id="confirmTitle">Confirm Action</h3>
+            </div>
+            <div class="alert-body">
+                <p id="confirmMessage">Are you sure you want to proceed?</p>
+            </div>
+            <div class="alert-actions">
+                <button id="confirmCancel" class="btn btn-secondary">Cancel</button>
+                <button id="confirmOk" class="btn">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="alertModal" class="alert-modal">
+        <div class="alert-modal-content">
+            <div class="alert-header">
+                <div id="alertIcon" class="alert-icon">ℹ️</div>
+                <h3 id="alertTitle">Notice</h3>
+            </div>
+            <div class="alert-body">
+                <p id="alertMessage">This is an alert message.</p>
+            </div>
+            <div class="alert-actions">
+                <button id="alertOk" class="btn">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toastContainer" class="toast-container"></div>
+
+    <script>
+        let characters = [];
+        let locations = [];
+        let plotPoints = [];
+        let books = [];
+        let notes = [];
+        let relationships = [];
+        let activeTab = 'characters';
+        let lastSaved = Date.now();
+        let saveTimeout;
+
+        const ModalSystem = {
+            confirm: function(message, callback, title = "Confirm Action") {
+                const modal = document.getElementById('confirmModal');
+                const titleEl = document.getElementById('confirmTitle');
+                const messageEl = document.getElementById('confirmMessage');
+                const okButton = document.getElementById('confirmOk');
+                const cancelButton = document.getElementById('confirmCancel');
+                
+                titleEl.textContent = title;
+                messageEl.textContent = message;
+                
+                const handleOk = function() {
+                    modal.style.display = 'none';
+                    okButton.removeEventListener('click', handleOk);
+                    cancelButton.removeEventListener('click', handleCancel);
+                    callback(true);
+                };
+                
+                const handleCancel = function() {
+                    modal.style.display = 'none';
+                    okButton.removeEventListener('click', handleOk);
+                    cancelButton.removeEventListener('click', handleCancel);
+                    callback(false);
+                };
+                
+                okButton.addEventListener('click', handleOk);
+                cancelButton.addEventListener('click', handleCancel);
+                
+                modal.style.display = 'flex';
+                modal.classList.add('fade-in');
+            },
+            
+            alert: function(message, title = "Notice", type = "info") {
+                const modal = document.getElementById('alertModal');
+                const titleEl = document.getElementById('alertTitle');
+                const messageEl = document.getElementById('alertMessage');
+                const iconEl = document.getElementById('alertIcon');
+                const okButton = document.getElementById('alertOk');
+                
+                titleEl.textContent = title;
+                messageEl.textContent = message;
+                
+                switch(type) {
+                    case 'success':
+                        iconEl.textContent = '✅';
+                        iconEl.className = 'alert-icon icon-success';
+                        break;
+                    case 'error':
+                        iconEl.textContent = '❌';
+                        iconEl.className = 'alert-icon icon-error';
+                        break;
+                    case 'warning':
+                        iconEl.textContent = '⚠️';
+                        iconEl.className = 'alert-icon icon-warning';
+                        break;
+                    default:
+                        iconEl.textContent = 'ℹ️';
+                        iconEl.className = 'alert-icon icon-info';
+                }
+                
+                const handleOk = function() {
+                    modal.style.display = 'none';
+                    okButton.removeEventListener('click', handleOk);
+                };
+                
+                okButton.addEventListener('click', handleOk);
+                
+                modal.style.display = 'flex';
+                modal.classList.add('fade-in');
+            },
+            
+            toast: function(message, type = 'info', duration = 3000) {
+                const container = document.getElementById('toastContainer');
+                const toast = document.createElement('div');
+                toast.className = `toast ${type}`;
+                
+                let icon = '';
+                switch(type) {
+                    case 'success':
+                        icon = '✅';
+                        break;
+                    case 'error':
+                        icon = '❌';
+                        break;
+                    case 'warning':
+                        icon = '⚠️';
+                        break;
+                    default:
+                        icon = 'ℹ️';
+                }
+                
+                toast.innerHTML = `<span class="toast-icon">${icon}</span><span>${message}</span>`;
+                container.appendChild(toast);
+                
+                setTimeout(() => {
+                    toast.style.animation = 'fadeOut 0.5s ease forwards';
+                    setTimeout(() => {
+                        container.removeChild(toast);
+                    }, 500);
+                }, duration);
+            }
+        };
+
+        function init() {
+            if (!window.memoryData) {
+                window.memoryData = {
+                    characters: [],
+                    locations: [],
+                    plotPoints: [],
+                    books: [],
+                    notes: [],
+                    relationships: []
+                };
+            }
+            
+            loadData();
+            renderSidebar();
+            renderGrid();
+            setupEventListeners();
+            
+            const storageStatusBar = document.createElement('div');
+            storageStatusBar.id = 'storageStatusBar';
+            storageStatusBar.style.padding = '5px 10px';
+            storageStatusBar.style.fontSize = '12px';
+            storageStatusBar.style.color = '#777';
+            storageStatusBar.style.backgroundColor = '#f8f9fa';
+            storageStatusBar.style.borderTop = '1px solid #ddd';
+            storageStatusBar.style.textAlign = 'right';
+            
+            let statusText = '';
+            if (window.storageType === 'localStorage') {
+                statusText = 'Data is saved automatically using localStorage';
+            } else if (window.storageType === 'sessionStorage') {
+                statusText = 'Data is saved for this session only. Export your data before closing the browser.';
+            } else {
+                statusText = 'Memory storage only. Please export your data frequently.';
+            }
+            
+            storageStatusBar.textContent = statusText;
+            document.querySelector('.main-content').appendChild(storageStatusBar);
+        }
+        
+        function loadData() {
+            let dataLoaded = false;
+            
+            try {
+                const testKey = 'seriesBible_storageTest';
+                localStorage.setItem(testKey, '1');
+                localStorage.removeItem(testKey);
+                
+                const storedCharacters = localStorage.getItem('seriesBible_characters');
+                const storedLocations = localStorage.getItem('seriesBible_locations');
+                const storedPlotPoints = localStorage.getItem('seriesBible_plotPoints');
+                const storedBooks = localStorage.getItem('seriesBible_books');
+                const storedNotes = localStorage.getItem('seriesBible_notes');
+                const storedRelationships = localStorage.getItem('seriesBible_relationships');
+                
+                characters = storedCharacters ? JSON.parse(storedCharacters) : [];
+                locations = storedLocations ? JSON.parse(storedLocations) : [];
+                plotPoints = storedPlotPoints ? JSON.parse(storedPlotPoints) : [];
+                books = storedBooks ? JSON.parse(storedBooks) : [];
+                notes = storedNotes ? JSON.parse(storedNotes) : [];
+                relationships = storedRelationships ? JSON.parse(storedRelationships) : [];
+                dataLoaded = true;
+                window.storageType = 'localStorage';
+            } catch (e) {
+                try {
+                    const testKey = 'seriesBible_sessionTest';
+                    sessionStorage.setItem(testKey, '1');
+                    sessionStorage.removeItem(testKey);
+                    
+                    const storedData = sessionStorage.getItem('seriesBibleData');
+                    if (storedData) {
+                        const data = JSON.parse(storedData);
+                        characters = data.characters || [];
+                        locations = data.locations || [];
+                        plotPoints = data.plotPoints || [];
+                        books = data.books || [];
+                        notes = data.notes || [];
+                        relationships = data.relationships || [];
+                        dataLoaded = true;
+                    }
+                    window.storageType = 'sessionStorage';
+                } catch (sessionErr) {
+                    window.storageType = 'memory';
+                }
+            }
+            
+            if (!dataLoaded) {
+                characters = window.memoryData ? window.memoryData.characters || [] : [];
+                locations = window.memoryData ? window.memoryData.locations || [] : [];
+                plotPoints = window.memoryData ? window.memoryData.plotPoints || [] : [];
+                books = window.memoryData ? window.memoryData.books || [] : [];
+                notes = window.memoryData ? window.memoryData.notes || [] : [];
+                relationships = window.memoryData ? window.memoryData.relationships || [] : [];
+                window.memoryData = { characters, locations, plotPoints, books, notes, relationships };
+            }
+            
+            window.isDataLoaded = true;
+        }
+        
+        function saveData() {
+            lastSaved = Date.now();
+            const statusElements = document.querySelectorAll('.save-status');
+            statusElements.forEach(el => {
+                el.textContent = 'Saving...';
+                el.classList.remove('saved', 'error');
+                el.classList.add('saving');
+            });
+            
+            if (window.storageType === 'localStorage') {
+                try {
+                    localStorage.setItem('seriesBible_characters', JSON.stringify(characters));
+                    localStorage.setItem('seriesBible_locations', JSON.stringify(locations));
+                    localStorage.setItem('seriesBible_plotPoints', JSON.stringify(plotPoints));
+                    localStorage.setItem('seriesBible_books', JSON.stringify(books));
+                    localStorage.setItem('seriesBible_notes', JSON.stringify(notes));
+                    localStorage.setItem('seriesBible_relationships', JSON.stringify(relationships));
+                    updateSaveStatus();
+                    return true;
+                } catch (e) {
+                    ModalSystem.toast('Error saving to local storage: ' + e.message, 'error');
+                    window.storageType = 'sessionStorage';
+                }
+            }
+            
+            if (window.storageType === 'sessionStorage') {
+                try {
+                    const allData = {
+                        characters, locations, plotPoints, books, notes, relationships,
+                        lastSaved: Date.now()
+                    };
+                    
+                    sessionStorage.setItem('seriesBibleData', JSON.stringify(allData));
+                    updateSaveStatus();
+                    return true;
+                } catch (sessionErr) {
+                    ModalSystem.toast('Error saving to session storage: ' + sessionErr.message, 'error');
+                    window.storageType = 'memory';
+                }
+            }
+            
+            if (window.storageType === 'memory') {
+                window.memoryData = { characters, locations, plotPoints, books, notes, relationships };
+                updateSaveStatus();
+                return true;
+            }
+            
+            statusElements.forEach(el => {
+                el.textContent = 'Error saving data';
+                el.classList.remove('saving', 'saved');
+                el.classList.add('error');
+            });
+            
+            return false;
+        }
+        
+        function setupEventListeners() {
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const tabName = this.getAttribute('data-tab');
+                    switchTab(tabName);
+                });
+            });
+            
+            document.getElementById('newCharacterBtn').addEventListener('click', () => openCharacterModal());
+            document.getElementById('newLocationBtn').addEventListener('click', () => openLocationModal());
+            document.getElementById('newPlotPointBtn').addEventListener('click', () => openPlotPointModal());
+            document.getElementById('newBookBtn').addEventListener('click', () => openBookModal());
+            document.getElementById('newNoteBtn').addEventListener('click', () => openNoteModal());
+            
+            document.getElementById('characterForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                saveCharacter();
+            });
+            
+            document.getElementById('locationForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                saveLocation();
+            });
+            
+            document.getElementById('plotPointForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                savePlotPoint();
+            });
+            
+            document.getElementById('bookForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                saveBook();
+            });
+            
+            document.getElementById('noteForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                saveNote();
+            });
+            
+            document.querySelectorAll('.modal .close').forEach(closeBtn => {
+                closeBtn.addEventListener('click', function() {
+                    this.closest('.modal').style.display = 'none';
+                });
+            });
+            
+            document.querySelectorAll('.modal').forEach(modal => {
+                modal.addEventListener('click', function(event) {
+                    if (event.target === this) {
+                        this.style.display = 'none';
+                    }
+                });
+            });
+            
+            document.getElementById('confirmModal').addEventListener('click', function(event) {
+                if (event.target === this) {
+                    this.style.display = 'none';
+                }
+            });
+            
+            document.getElementById('alertModal').addEventListener('click', function(event) {
+                if (event.target === this) {
+                    this.style.display = 'none';
+                }
+            });
+            
+            document.getElementById('searchBox').addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase();
+                filterSidebarItems(searchTerm);
+            });
+            
+            document.getElementById('organizeTimelineBtn').addEventListener('click', renderTimeline);
+            
+            document.querySelectorAll('.toolbar-btn').forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const command = this.getAttribute('data-command');
+                    
+                    if (command === 'createLink') {
+                        const modal = document.createElement('div');
+                        modal.className = 'modal';
+                        modal.style.display = 'flex';
+                        
+                        const content = document.createElement('div');
+                        content.className = 'modal-content';
+                        
+                        const header = document.createElement('div');
+                        header.className = 'modal-header';
+                        header.innerHTML = '<h3>Insert Link</h3><span class="close">&times;</span>';
+                        
+                        const form = document.createElement('form');
+                        form.innerHTML = `
+                            <div class="form-group">
+                                <label for="linkUrl">URL</label>
+                                <input type="url" id="linkUrl" placeholder="https://example.com" required>
+                            </div>
+                            <button type="submit" class="btn">Insert Link</button>
+                        `;
+                        
+                        content.appendChild(header);
+                        content.appendChild(form);
+                        modal.appendChild(content);
+                        document.body.appendChild(modal);
+                        
+                        const closeBtn = modal.querySelector('.close');
+                        closeBtn.addEventListener('click', () => {
+                            document.body.removeChild(modal);
+                        });
+                        
+                        form.addEventListener('submit', (e) => {
+                            e.preventDefault();
+                            const url = document.getElementById('linkUrl').value;
+                            if (url) {
+                                document.execCommand('createLink', false, url);
+                                document.getElementById('noteContent').focus();
+                            }
+                            document.body.removeChild(modal);
+                        });
+                    } else {
+                        document.execCommand(command, false, null);
+                        document.getElementById('noteContent').focus();
+                    }
+                });
+            });
+            
+            document.getElementById('exportBtn').addEventListener('click', exportData);
+            document.getElementById('importBtn').addEventListener('click', () => document.getElementById('importData').click());
+            document.getElementById('importData').addEventListener('change', importData);
+            
+            document.getElementById('noteContent').addEventListener('input', () => {
+                if (saveTimeout) clearTimeout(saveTimeout);
+                document.getElementById('noteSaveStatus').textContent = 'Saving...';
+                saveTimeout = setTimeout(() => {
+                    saveData();
+                    document.getElementById('noteSaveStatus').textContent = 'Saved';
+                }, 1000);
+            });
+            
+            window.addEventListener('beforeunload', function(e) {
+                saveData();
+            });
+            
+            setInterval(saveData, 60000);
+        }
+        
+        function switchTab(tabName) {
+            activeTab = tabName;
+            
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelector(`.tab[data-tab="${tabName}"]`).classList.add('active');
+            
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.remove('active');
+            });
+            document.getElementById(tabName).classList.add('active');
+            
+            if (tabName === 'timeline') {
+                renderTimeline();
+            } else if (tabName === 'relationships') {
+                renderRelationships();
+            } else {
+                renderGrid();
+            }
+        }
+        
+        function renderSidebar() {
+            renderSidebarList('charactersList', characters, 'name');
+            renderSidebarList('locationsList', locations, 'name');
+            renderSidebarList('plotPointsList', plotPoints, 'title');
+            renderSidebarList('booksList', books, 'title');
+            renderSidebarList('notesList', notes, 'title');
+        }
+        
+        function renderSidebarList(elementId, items, titleProperty) {
+            const listElement = document.getElementById(elementId);
+            listElement.innerHTML = '';
+            
+            items.forEach(item => {
+                const itemElement = document.createElement('div');
+                itemElement.className = 'item';
+                itemElement.textContent = item[titleProperty] || 'Untitled';
+                itemElement.addEventListener('click', () => {
+                    if (elementId === 'charactersList') {
+                        openCharacterModal(item.id);
+                    } else if (elementId === 'locationsList') {
+                        openLocationModal(item.id);
+                    } else if (elementId === 'plotPointsList') {
+                        openPlotPointModal(item.id);
+                    } else if (elementId === 'booksList') {
+                        openBookModal(item.id);
+                    } else if (elementId === 'notesList') {
+                        openNoteModal(item.id);
+                    }
+                });
+                listElement.appendChild(itemElement);
+            });
+        }
+        
+        function filterSidebarItems(searchTerm) {
+            document.querySelectorAll('.item').forEach(item => {
+                const text = item.textContent.toLowerCase();
+                if (text.includes(searchTerm)) {
+                    item.style.display = 'block';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        }
+        
+        function renderGrid() {
+            if (activeTab === 'characters') {
+                renderCharactersGrid();
+            } else if (activeTab === 'locations') {
+                renderLocationsGrid();
+            } else if (activeTab === 'plot') {
+                renderPlotGrid();
+            } else if (activeTab === 'books') {
+                renderBooksGrid();
+            } else if (activeTab === 'notes') {
+                renderNotesGrid();
+            }
+        }
+        
+        function renderCharactersGrid() {
+            const gridElement = document.getElementById('charactersGrid');
+            gridElement.innerHTML = '';
+            
+            characters.forEach(character => {
+                const card = document.createElement('div');
+                card.className = 'character-card';
+                card.dataset.id = character.id;
+                card.innerHTML = `
+                    <div class="card-header">
+                        <h3>${character.name || 'Unnamed Character'}</h3>
+                        <div class="card-actions">
+                            <button class="btn edit-character-btn">Edit</button>
+                            <button class="btn btn-secondary delete-character-btn">Delete</button>
+                        </div>
+                    </div>
+                    <p><strong>Role:</strong> ${character.role || 'N/A'}</p>
+                    <p><strong>Age:</strong> ${character.age || 'N/A'}</p>
+                    <p>${character.appearance ? '<strong>Appearance:</strong> ' + truncateText(character.appearance, 100) : ''}</p>
+                `;
+                gridElement.appendChild(card);
+                
+                card.querySelector('.edit-character-btn').addEventListener('click', () => {
+                    openCharacterModal(character.id);
+                });
+                
+                card.querySelector('.delete-character-btn').addEventListener('click', () => {
+                    deleteCharacter(character.id);
+                });
+            });
+        }
+        
+        function renderLocationsGrid() {
+            const gridElement = document.getElementById('locationsGrid');
+            gridElement.innerHTML = '';
+            
+            locations.forEach(location => {
+                const card = document.createElement('div');
+                card.className = 'location-card';
+                card.dataset.id = location.id;
+                card.innerHTML = `
+                    <div class="card-header">
+                        <h3>${location.name || 'Unnamed Location'}</h3>
+                        <div class="card-actions">
+                            <button class="btn edit-location-btn">Edit</button>
+                            <button class="btn btn-secondary delete-location-btn">Delete</button>
+                        </div>
+                    </div>
+                    <p><strong>Type:</strong> ${location.type || 'N/A'}</p>
+                    <p>${location.description ? truncateText(location.description, 150) : ''}</p>
+                `;
+                gridElement.appendChild(card);
+                
+                card.querySelector('.edit-location-btn').addEventListener('click', () => {
+                    openLocationModal(location.id);
+                });
+                
+                card.querySelector('.delete-location-btn').addEventListener('click', () => {
+                    deleteLocation(location.id);
+                });
+            });
+        }
+        
+        function renderPlotGrid() {
+            const gridElement = document.getElementById('plotGrid');
+            gridElement.innerHTML = '';
+            
+            plotPoints.forEach(plotPoint => {
+                const bookName = getBookName(plotPoint.bookId);
+                const card = document.createElement('div');
+                card.className = 'plotpoint-card';
+                card.dataset.id = plotPoint.id;
+                card.innerHTML = `
+                    <div class="card-header">
+                        <h3>${plotPoint.title || 'Unnamed Plot Point'}</h3>
+                        <div class="card-actions">
+                            <button class="btn edit-plotpoint-btn">Edit</button>
+                            <button class="btn btn-secondary delete-plotpoint-btn">Delete</button>
+                        </div>
+                    </div>
+                    <p><strong>Book:</strong> ${bookName}</p>
+                    <p><strong>Order:</strong> ${plotPoint.order || 'N/A'}</p>
+                    <p>${plotPoint.description ? truncateText(plotPoint.description, 150) : ''}</p>
+                `;
+                gridElement.appendChild(card);
+                
+                card.querySelector('.edit-plotpoint-btn').addEventListener('click', () => {
+                    openPlotPointModal(plotPoint.id);
+                });
+                
+                card.querySelector('.delete-plotpoint-btn').addEventListener('click', () => {
+                    deletePlotPoint(plotPoint.id);
+                });
+            });
+        }
+        
+        function renderBooksGrid() {
+            const gridElement = document.getElementById('booksGrid');
+            gridElement.innerHTML = '';
+            
+            books.forEach(book => {
+                const card = document.createElement('div');
+                card.className = 'book-card';
+                card.dataset.id = book.id;
+                card.innerHTML = `
+                    <div class="card-header">
+                        <h3>${book.title || 'Unnamed Book'}</h3>
+                        <div class="card-actions">
+                            <button class="btn edit-book-btn">Edit</button>
+                            <button class="btn btn-secondary delete-book-btn">Delete</button>
+                        </div>
+                    </div>
+                    <p><strong>Number:</strong> ${book.number || 'N/A'}</p>
+                    <p><strong>Status:</strong> ${book.status || 'N/A'}</p>
+                    <p>${book.synopsis ? truncateText(book.synopsis, 150) : ''}</p>
+                `;
+                gridElement.appendChild(card);
+                
+                card.querySelector('.edit-book-btn').addEventListener('click', () => {
+                    openBookModal(book.id);
+                });
+                
+                card.querySelector('.delete-book-btn').addEventListener('click', () => {
+                    deleteBook(book.id);
+                });
+            });
+        }
+        
+        function renderNotesGrid() {
+            const gridElement = document.getElementById('notesGrid');
+            gridElement.innerHTML = '';
+            
+            notes.forEach(note => {
+                const card = document.createElement('div');
+                card.className = 'note-card';
+                card.dataset.id = note.id;
+                card.innerHTML = `
+                    <div class="card-header">
+                        <h3>${note.title || 'Unnamed Note'}</h3>
+                        <div class="card-actions">
+                            <button class="btn edit-note-btn">Edit</button>
+                            <button class="btn btn-secondary delete-note-btn">Delete</button>
+                        </div>
+                    </div>
+                    <p><strong>Category:</strong> ${note.category || 'N/A'}</p>
+                    <div>${note.content ? truncateText(note.content, 200, true) : ''}</div>
+                `;
+                gridElement.appendChild(card);
+                
+                card.querySelector('.edit-note-btn').addEventListener('click', () => {
+                    openNoteModal(note.id);
+                });
+                
+                card.querySelector('.delete-note-btn').addEventListener('click', () => {
+                    deleteNote(note.id);
+                });
+            });
+        }
+        
+        function renderTimeline() {
+            const timelineElement = document.getElementById('timelineContent');
+            timelineElement.innerHTML = '';
+            
+            const sortedPlotPoints = [...plotPoints].sort((a, b) => {
+                const bookA = books.find(book => book.id === a.bookId);
+                const bookB = books.find(book => book.id === b.bookId);
+                const bookNumberA = bookA ? bookA.number : 0;
+                const bookNumberB = bookB ? bookB.number : 0;
+                
+                if (bookNumberA !== bookNumberB) {
+                    return bookNumberA - bookNumberB;
+                }
+                
+                return a.order - b.order;
+            });
+            
+            let currentBookId = null;
+            
+            sortedPlotPoints.forEach(plotPoint => {
+                if (plotPoint.bookId !== currentBookId) {
+                    currentBookId = plotPoint.bookId;
+                    const bookName = getBookName(currentBookId);
+                    
+                    const bookHeader = document.createElement('h3');
+                    bookHeader.textContent = bookName;
+                    timelineElement.appendChild(bookHeader);
+                }
+                
+                const timelineItem = document.createElement('div');
+                timelineItem.className = 'timeline-item';
+                timelineItem.innerHTML = `
+                    <h4>${plotPoint.title || 'Unnamed Plot Point'}</h4>
+                    <p>${plotPoint.description || ''}</p>
+                    <p><small>Characters: ${plotPoint.characters || 'None specified'}</small></p>
+                `;
+                timelineItem.addEventListener('click', () => openPlotPointModal(plotPoint.id));
+                timelineElement.appendChild(timelineItem);
+            });
+            
+            if (sortedPlotPoints.length === 0) {
+                timelineElement.innerHTML = '<p>No plot points added yet. Create plot points to see them in the timeline.</p>';
+            }
+        }
+        
+        function renderRelationships() {
+            const mapElement = document.getElementById('relationshipMap');
+            mapElement.innerHTML = '';
+            
+            if (characters.length === 0) {
+                mapElement.innerHTML = '<p>Add characters to visualize relationships.</p>';
+                return;
+            }
+            
+            characters.forEach((character, index) => {
+                const nodeElement = document.createElement('div');
+                nodeElement.className = 'relationship-node';
+                nodeElement.textContent = character.name;
+                nodeElement.dataset.id = character.id;
+                
+                const angle = (index / characters.length) * Math.PI * 2;
+                const radius = Math.min(mapElement.offsetWidth, mapElement.offsetHeight) / 2.5;
+                const left = mapElement.offsetWidth / 2 + radius * Math.cos(angle) - 30;
+                const top = mapElement.offsetHeight / 2 + radius * Math.sin(angle) - 30;
+                
+                nodeElement.style.left = `${left}px`;
+                nodeElement.style.top = `${top}px`;
+                
+                nodeElement.addEventListener('mousedown', startDrag);
+                
+                mapElement.appendChild(nodeElement);
+            });
+            
+            relationships.forEach(rel => {
+                createRelationshipLine(rel.from, rel.to, mapElement);
+            });
+            
+            const addButton = document.createElement('button');
+            addButton.className = 'btn';
+            addButton.textContent = '+ Add Relationship';
+            addButton.style.position = 'absolute';
+            addButton.style.bottom = '10px';
+            addButton.style.right = '10px';
+            addButton.addEventListener('click', createRelationship);
+            mapElement.appendChild(addButton);
+        }
+        
+        function createRelationshipLine(fromId, toId, container) {
+            const fromNode = container.querySelector(`.relationship-node[data-id="${fromId}"]`);
+            const toNode = container.querySelector(`.relationship-node[data-id="${toId}"]`);
+            
+            if (!fromNode || !toNode) return;
+            
+            const fromRect = fromNode.getBoundingClientRect();
+            const toRect = toNode.getBoundingClientRect();
+            const containerRect = container.getBoundingClientRect();
+            
+            const fromX = fromRect.left + fromRect.width / 2 - containerRect.left;
+            const fromY = fromRect.top + fromRect.height / 2 - containerRect.top;
+            const toX = toRect.left + toRect.width / 2 - containerRect.left;
+            const toY = toRect.top + toRect.height / 2 - containerRect.top;
+            
+            const length = Math.sqrt(Math.pow(toX - fromX, 2) + Math.pow(toY - fromY, 2));
+            const angle = Math.atan2(toY - fromY, toX - fromX) * 180 / Math.PI;
+            
+            const line = document.createElement('div');
+            line.className = 'relationship-line';
+            line.style.width = `${length}px`;
+            line.style.left = `${fromX}px`;
+            line.style.top = `${fromY}px`;
+            line.style.transform = `rotate(${angle}deg)`;
+            line.style.height = '2px';
+            
+            container.appendChild(line);
+        }
+        
+        function startDrag(e) {
+            const node = e.target;
+            const container = node.parentElement;
+            
+            const startX = e.clientX;
+            const startY = e.clientY;
+            const startLeft = parseInt(node.style.left);
+            const startTop = parseInt(node.style.top);
+            
+            function moveNode(e) {
+                const newLeft = startLeft + e.clientX - startX;
+                const newTop = startTop + e.clientY - startY;
+                
+                node.style.left = `${newLeft}px`;
+                node.style.top = `${newTop}px`;
+                
+                container.querySelectorAll('.relationship-line').forEach(line => line.remove());
+                relationships.forEach(rel => {
+                    createRelationshipLine(rel.from, rel.to, container);
+                });
+            }
+            
+            function stopDrag() {
+                document.removeEventListener('mousemove', moveNode);
+                document.removeEventListener('mouseup', stopDrag);
+            }
+            
+            document.addEventListener('mousemove', moveNode);
+            document.addEventListener('mouseup', stopDrag);
+        }
+        
+        function createRelationship() {
+            if (characters.length < 2) {
+                ModalSystem.alert('You need at least two characters to create a relationship.', 'Cannot Create Relationship', 'error');
+                return;
+            }
+            
+            const modal = document.createElement('div');
+            modal.className = 'modal';
+            modal.style.display = 'flex';
+            
+            const content = document.createElement('div');
+            content.className = 'modal-content';
+            
+            const header = document.createElement('div');
+            header.className = 'modal-header';
+            header.innerHTML = '<h3>Create Relationship</h3><span class="close">&times;</span>';
+            
+            const form = document.createElement('form');
+            form.innerHTML = `
+                <div class="form-group">
+                    <label for="fromCharacter">First Character</label>
+                    <select id="fromCharacter" required>
+                        <option value="">Select Character</option>
+                        ${characters.map(c => `<option value="${c.id}">${c.name}</option>`).join('')}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="toCharacter">Second Character</label>
+                    <select id="toCharacter" required>
+                        <option value="">Select Character</option>
+                        ${characters.map(c => `<option value="${c.id}">${c.name}</option>`).join('')}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="relationType">Relationship Type</label>
+                    <input type="text" id="relationType" placeholder="e.g., friend, enemy, family" required>
+                </div>
+                <button type="submit" class="btn">Create Relationship</button>
+            `;
+            
+            content.appendChild(header);
+            content.appendChild(form);
+            modal.appendChild(content);
+            document.body.appendChild(modal);
+            
+            const closeBtn = modal.querySelector('.close');
+            closeBtn.addEventListener('click', () => {
+                document.body.removeChild(modal);
+            });
+            
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                
+                const fromId = document.getElementById('fromCharacter').value;
+                const toId = document.getElementById('toCharacter').value;
+                const type = document.getElementById('relationType').value;
+                
+                if (!fromId || !toId || !type) {
+                    ModalSystem.alert('Please complete all fields.', 'Incomplete Form', 'warning');
+                    return;
+                }
+                
+                if (fromId === toId) {
+                    ModalSystem.alert('Please select two different characters.', 'Invalid Selection', 'warning');
+                    return;
+                }
+                
+                const newRelationship = {
+                    id: generateId(),
+                    from: fromId,
+                    to: toId,
+                    type: type
+                };
+                
+                relationships.push(newRelationship);
+                saveData();
+                renderRelationships();
+                document.body.removeChild(modal);
+                ModalSystem.toast('Relationship created successfully', 'success');
+            });
+        }
+        
+        function openCharacterModal(characterId = null) {
+            const modal = document.getElementById('characterModal');
+            const form = document.getElementById('characterForm');
+            const title = document.getElementById('characterModalTitle');
+            
+            form.reset();
+            
+            if (characterId) {
+                const character = characters.find(c => c.id === characterId);
+                if (character) {
+                    document.getElementById('characterId').value = character.id;
+                    document.getElementById('characterName').value = character.name || '';
+                    document.getElementById('characterAge').value = character.age || '';
+                    document.getElementById('characterRole').value = character.role || '';
+                    document.getElementById('characterAppearance').value = character.appearance || '';
+                    document.getElementById('characterPersonality').value = character.personality || '';
+                    document.getElementById('characterBackground').value = character.background || '';
+                    document.getElementById('characterGoals').value = character.goals || '';
+                    document.getElementById('characterConflicts').value = character.conflicts || '';
+                    document.getElementById('characterArc').value = character.arc || '';
+                    document.getElementById('characterNotes').value = character.notes || '';
+                    
+                    title.textContent = 'Edit Character';
+                }
+            } else {
+                document.getElementById('characterId').value = '';
+                title.textContent = 'New Character';
+            }
+            
+            modal.style.display = 'flex';
+        }
+        
+        function saveCharacter() {
+            const characterId = document.getElementById('characterId').value;
+            const name = document.getElementById('characterName').value;
+            const age = document.getElementById('characterAge').value;
+            const role = document.getElementById('characterRole').value;
+            const appearance = document.getElementById('characterAppearance').value;
+            const personality = document.getElementById('characterPersonality').value;
+            const background = document.getElementById('characterBackground').value;
+            const goals = document.getElementById('characterGoals').value;
+            const conflicts = document.getElementById('characterConflicts').value;
+            const arc = document.getElementById('characterArc').value;
+            const notes = document.getElementById('characterNotes').value;
+            
+            const character = {
+                id: characterId || generateId(),
+                name,
+                age,
+                role,
+                appearance,
+                personality,
+                background,
+                goals,
+                conflicts,
+                arc,
+                notes
+            };
+            
+            if (characterId) {
+                const index = characters.findIndex(c => c.id === characterId);
+                if (index !== -1) {
+                    characters[index] = character;
+                }
+            } else {
+                characters.push(character);
+            }
+            
+            saveData();
+            renderSidebar();
+            renderGrid();
+            
+            document.getElementById('characterModal').style.display = 'none';
+            ModalSystem.toast('Character saved successfully', 'success');
+        }
+        
+        function deleteCharacter(characterId) {
+            ModalSystem.confirm('Are you sure you want to delete this character?', (confirmed) => {
+                if (confirmed) {
+                    characters = characters.filter(c => c.id !== characterId);
+                    saveData();
+                    renderSidebar();
+                    renderGrid();
+                    ModalSystem.toast('Character deleted successfully', 'success');
+                }
+            }, 'Delete Character');
+        }
+        
+        function openLocationModal(locationId = null) {
+            const modal = document.getElementById('locationModal');
+            const form = document.getElementById('locationForm');
+            const title = document.getElementById('locationModalTitle');
+            
+            form.reset();
+            
+            if (locationId) {
+                const location = locations.find(l => l.id === locationId);
+                if (location) {
+                    document.getElementById('locationId').value = location.id;
+                    document.getElementById('locationName').value = location.name || '';
+                    document.getElementById('locationType').value = location.type || '';
+                    document.getElementById('locationDescription').value = location.description || '';
+                    document.getElementById('locationSignificance').value = location.significance || '';
+                    document.getElementById('locationNotes').value = location.notes || '';
+                    
+                    title.textContent = 'Edit Location';
+                }
+            } else {
+                document.getElementById('locationId').value = '';
+                title.textContent = 'New Location';
+            }
+            
+            modal.style.display = 'flex';
+        }
+        
+        function saveLocation() {
+            const locationId = document.getElementById('locationId').value;
+            const name = document.getElementById('locationName').value;
+            const type = document.getElementById('locationType').value;
+            const description = document.getElementById('locationDescription').value;
+            const significance = document.getElementById('locationSignificance').value;
+            const notes = document.getElementById('locationNotes').value;
+            
+            const location = {
+                id: locationId || generateId(),
+                name,
+                type,
+                description,
+                significance,
+                notes
+            };
+            
+            if (locationId) {
+                const index = locations.findIndex(l => l.id === locationId);
+                if (index !== -1) {
+                    locations[index] = location;
+                }
+            } else {
+                locations.push(location);
+            }
+            
+            saveData();
+            renderSidebar();
+            renderGrid();
+            
+            document.getElementById('locationModal').style.display = 'none';
+            ModalSystem.toast('Location saved successfully', 'success');
+        }
+        
+        function deleteLocation(locationId) {
+            ModalSystem.confirm('Are you sure you want to delete this location?', (confirmed) => {
+                if (confirmed) {
+                    locations = locations.filter(l => l.id !== locationId);
+                    saveData();
+                    renderSidebar();
+                    renderGrid();
+                    ModalSystem.toast('Location deleted successfully', 'success');
+                }
+            }, 'Delete Location');
+        }
+        
+        function openPlotPointModal(plotPointId = null) {
+            const modal = document.getElementById('plotPointModal');
+            const form = document.getElementById('plotPointForm');
+            const title = document.getElementById('plotPointModalTitle');
+            const bookSelect = document.getElementById('plotPointBook');
+            
+            form.reset();
+            bookSelect.innerHTML = '<option value="">Select Book</option>';
+            
+            books.forEach(book => {
+                const option = document.createElement('option');
+                option.value = book.id;
+                option.textContent = book.title;
+                bookSelect.appendChild(option);
+            });
+            
+            if (plotPointId) {
+                const plotPoint = plotPoints.find(p => p.id === plotPointId);
+                if (plotPoint) {
+                    document.getElementById('plotPointId').value = plotPoint.id;
+                    document.getElementById('plotPointTitle').value = plotPoint.title || '';
+                    document.getElementById('plotPointBook').value = plotPoint.bookId || '';
+                    document.getElementById('plotPointOrder').value = plotPoint.order || '';
+                    document.getElementById('plotPointDescription').value = plotPoint.description || '';
+                    document.getElementById('plotPointCharacters').value = plotPoint.characters || '';
+                    document.getElementById('plotPointConsequences').value = plotPoint.consequences || '';
+                    document.getElementById('plotPointNotes').value = plotPoint.notes || '';
+                    
+                    title.textContent = 'Edit Plot Point';
+                }
+            } else {
+                document.getElementById('plotPointId').value = '';
+                title.textContent = 'New Plot Point';
+            }
+            
+            modal.style.display = 'flex';
+        }
+        
+        function savePlotPoint() {
+            const plotPointId = document.getElementById('plotPointId').value;
+            const title = document.getElementById('plotPointTitle').value;
+            const bookId = document.getElementById('plotPointBook').value;
+            const order = document.getElementById('plotPointOrder').value;
+            const description = document.getElementById('plotPointDescription').value;
+            const characters = document.getElementById('plotPointCharacters').value;
+            const consequences = document.getElementById('plotPointConsequences').value;
+            const notes = document.getElementById('plotPointNotes').value;
+            
+            const plotPoint = {
+                id: plotPointId || generateId(),
+                title,
+                bookId,
+                order: parseInt(order) || 0,
+                description,
+                characters,
+                consequences,
+                notes
+            };
+            
+            if (plotPointId) {
+                const index = plotPoints.findIndex(p => p.id === plotPointId);
+                if (index !== -1) {
+                    plotPoints[index] = plotPoint;
+                }
+            } else {
+                plotPoints.push(plotPoint);
+            }
+            
+            saveData();
+            renderSidebar();
+            renderGrid();
+            
+            document.getElementById('plotPointModal').style.display = 'none';
+            ModalSystem.toast('Plot point saved successfully', 'success');
+        }
+        
+        function deletePlotPoint(plotPointId) {
+            ModalSystem.confirm('Are you sure you want to delete this plot point?', (confirmed) => {
+                if (confirmed) {
+                    plotPoints = plotPoints.filter(p => p.id !== plotPointId);
+                    saveData();
+                    renderSidebar();
+                    renderGrid();
+                    ModalSystem.toast('Plot point deleted successfully', 'success');
+                }
+            }, 'Delete Plot Point');
+        }
+        
+        function openBookModal(bookId = null) {
+            const modal = document.getElementById('bookModal');
+            const form = document.getElementById('bookForm');
+            const title = document.getElementById('bookModalTitle');
+            
+            form.reset();
+            
+            if (bookId) {
+                const book = books.find(b => b.id === bookId);
+                if (book) {
+                    document.getElementById('bookId').value = book.id;
+                    document.getElementById('bookTitle').value = book.title || '';
+                    document.getElementById('bookNumber').value = book.number || '';
+                    document.getElementById('bookStatus').value = book.status || 'Planning';
+                    document.getElementById('bookSynopsis').value = book.synopsis || '';
+                    document.getElementById('bookThemes').value = book.themes || '';
+                    document.getElementById('bookCharacterArcs').value = book.characterArcs || '';
+                    document.getElementById('bookNotes').value = book.notes || '';
+                    
+                    title.textContent = 'Edit Book';
+                }
+            } else {
+                document.getElementById('bookId').value = '';
+                title.textContent = 'New Book';
+            }
+            
+            modal.style.display = 'flex';
+        }
+        
+        function saveBook() {
+            const bookId = document.getElementById('bookId').value;
+            const title = document.getElementById('bookTitle').value;
+            const number = document.getElementById('bookNumber').value;
+            const status = document.getElementById('bookStatus').value;
+            const synopsis = document.getElementById('bookSynopsis').value;
+            const themes = document.getElementById('bookThemes').value;
+            const characterArcs = document.getElementById('bookCharacterArcs').value;
+            const notes = document.getElementById('bookNotes').value;
+            
+            const book = {
+                id: bookId || generateId(),
+                title,
+                number: parseInt(number) || 0,
+                status,
+                synopsis,
+                themes,
+                characterArcs,
+                notes
+            };
+            
+            if (bookId) {
+                const index = books.findIndex(b => b.id === bookId);
+                if (index !== -1) {
+                    books[index] = book;
+                }
+            } else {
+                books.push(book);
+            }
+            
+            saveData();
+            renderSidebar();
+            renderGrid();
+            
+            document.getElementById('bookModal').style.display = 'none';
+            ModalSystem.toast('Book saved successfully', 'success');
+        }
+        
+        function deleteBook(bookId) {
+            ModalSystem.confirm('Are you sure you want to delete this book?', (confirmed) => {
+                if (confirmed) {
+                    books = books.filter(b => b.id !== bookId);
+                    saveData();
+                    renderSidebar();
+                    renderGrid();
+                    ModalSystem.toast('Book deleted successfully', 'success');
+                }
+            }, 'Delete Book');
+        }
+        
+        function openNoteModal(noteId = null) {
+            const modal = document.getElementById('noteModal');
+            const form = document.getElementById('noteForm');
+            const title = document.getElementById('noteModalTitle');
+            const contentEditor = document.getElementById('noteContent');
+            
+            form.reset();
+            contentEditor.innerHTML = '';
+            
+            if (noteId) {
+                const note = notes.find(n => n.id === noteId);
+                if (note) {
+                    document.getElementById('noteId').value = note.id;
+                    document.getElementById('noteTitle').value = note.title || '';
+                    document.getElementById('noteCategory').value = note.category || 'Other';
+                    contentEditor.innerHTML = note.content || '';
+                    
+                    title.textContent = 'Edit Note';
+                }
+            } else {
+                document.getElementById('noteId').value = '';
+                title.textContent = 'New Note';
+            }
+            
+            modal.style.display = 'flex';
+        }
+        
+        function saveNote() {
+            const noteId = document.getElementById('noteId').value;
+            const title = document.getElementById('noteTitle').value;
+            const category = document.getElementById('noteCategory').value;
+            const content = document.getElementById('noteContent').innerHTML;
+            
+            const note = {
+                id: noteId || generateId(),
+                title,
+                category,
+                content
+            };
+            
+            if (noteId) {
+                const index = notes.findIndex(n => n.id === noteId);
+                if (index !== -1) {
+                    notes[index] = note;
+                }
+            } else {
+                notes.push(note);
+            }
+            
+            saveData();
+            renderSidebar();
+            renderGrid();
+            
+            document.getElementById('noteModal').style.display = 'none';
+            ModalSystem.toast('Note saved successfully', 'success');
+        }
+        
+        function deleteNote(noteId) {
+            ModalSystem.confirm('Are you sure you want to delete this note?', (confirmed) => {
+                if (confirmed) {
+                    notes = notes.filter(n => n.id !== noteId);
+                    saveData();
+                    renderSidebar();
+                    renderGrid();
+                    ModalSystem.toast('Note deleted successfully', 'success');
+                }
+            }, 'Delete Note');
+        }
+        
+        function exportData() {
+            const data = {
+                characters,
+                locations,
+                plotPoints,
+                books,
+                notes,
+                relationships,
+                exportDate: new Date().toISOString()
+            };
+            
+            const dataStr = JSON.stringify(data);
+            const blob = new Blob([dataStr], {type: 'application/json'});
+            const url = URL.createObjectURL(blob);
+            
+            const downloadLink = document.createElement('a');
+            downloadLink.href = url;
+            downloadLink.download = 'series-bible-data.json';
+            
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+            
+            setTimeout(() => {
+                URL.revokeObjectURL(url);
+            }, 100);
+            
+            ModalSystem.toast('Data exported successfully', 'success');
+        }
+        
+        function importData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    
+                    ModalSystem.confirm('This will replace all current data. Continue?', (confirmed) => {
+                        if (confirmed) {
+                            characters = data.characters || [];
+                            locations = data.locations || [];
+                            plotPoints = data.plotPoints || [];
+                            books = data.books || [];
+                            notes = data.notes || [];
+                            relationships = data.relationships || [];
+                            
+                            saveData();
+                            renderSidebar();
+                            renderGrid();
+                            
+                            ModalSystem.alert('Data imported successfully!', 'Import Complete', 'success');
+                        }
+                    }, 'Import Data');
+                    
+                } catch (error) {
+                    ModalSystem.alert('Error importing data: ' + error.message, 'Import Error', 'error');
+                }
+            };
+            reader.readAsText(file);
+        }
+        
+        function updateSaveStatus() {
+            const statusElements = document.querySelectorAll('.save-status');
+            statusElements.forEach(el => {
+                const now = Date.now();
+                const secondsSince = Math.floor((now - lastSaved) / 1000);
+                
+                el.classList.remove('saving', 'saved', 'error');
+                
+                if (secondsSince < 5) {
+                    el.textContent = 'Saved just now';
+                    el.classList.add('saved');
+                } else if (secondsSince < 60) {
+                    el.textContent = `Saved ${secondsSince} seconds ago`;
+                    el.classList.add('saved');
+                } else {
+                    const minutes = Math.floor(secondsSince / 60);
+                    el.textContent = `Saved ${minutes} minute${minutes > 1 ? 's' : ''} ago`;
+                }
+            });
+        }
+        
+        function generateId() {
+            return Date.now().toString(36) + Math.random().toString(36).substring(2, 5);
+        }
+        
+        function getBookName(bookId) {
+            const book = books.find(b => b.id === bookId);
+            return book ? book.title : 'Unknown Book';
+        }
+        
+        function truncateText(text, maxLength, allowHtml = false) {
+            if (!text) return '';
+            
+            if (allowHtml) {
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = text;
+                const textContent = tempDiv.textContent;
+                
+                if (textContent.length <= maxLength) return text;
+                
+                return textContent.substring(0, maxLength) + '...';
+            } else {
+                if (text.length <= maxLength) return text;
+                return text.substring(0, maxLength) + '...';
+            }
+        }
+        
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
+        }
+    </script>
+</body>
+</html>
